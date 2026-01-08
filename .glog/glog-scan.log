@@ -1,4 +1,4 @@
-Jan 05, 2026 1:18:23 PM ai.glog.service.GlogService getFromGlog
+Jan 08, 2026 11:17:37 AM ai.glog.service.GlogService getFromGlog
 SEVERE: java.lang.IllegalStateException: Expected BEGIN_ARRAY but was BEGIN_OBJECT at line 1 column 2 path $
 {"sink":["Ensure this field has no more than 5000 characters."]}
 com.google.gson.JsonSyntaxException: java.lang.IllegalStateException: Expected BEGIN_ARRAY but was BEGIN_OBJECT at line 1 column 2 path $
@@ -6,7 +6,7 @@ com.google.gson.JsonSyntaxException: java.lang.IllegalStateException: Expected B
 	at com.google.gson.Gson.fromJson(Gson.java:956)
 	at com.google.gson.Gson.fromJson(Gson.java:905)
 	at ai.glog.service.GlogService.getFromGlog(GlogService.java:174)
-	at ai.glog.execute.workers.TriageAndRemediationCallableWorker.setGeneralRemediation(TriageAndRemediationCallableWorker.java:209)
+	at ai.glog.execute.workers.TriageAndRemediationCallableWorker.setGeneralRemediation(TriageAndRemediationCallableWorker.java:212)
 	at ai.glog.execute.workers.TriageAndRemediationCallableWorker.call(TriageAndRemediationCallableWorker.java:64)
 	at ai.glog.execute.workers.TriageAndRemediationCallableWorker.call(TriageAndRemediationCallableWorker.java:32)
 	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
@@ -19,7 +19,7 @@ Caused by: java.lang.IllegalStateException: Expected BEGIN_ARRAY but was BEGIN_O
 	at com.google.gson.Gson.fromJson(Gson.java:991)
 	... 10 more
 
-Jan 05, 2026 1:18:48 PM ai.glog.service.GlogService getFromGlog
+Jan 08, 2026 11:19:07 AM ai.glog.service.GlogService getFromGlog
 SEVERE: java.lang.IllegalStateException: Expected BEGIN_ARRAY but was BEGIN_OBJECT at line 1 column 2 path $
 {"sink":["Ensure this field has no more than 5000 characters."]}
 com.google.gson.JsonSyntaxException: java.lang.IllegalStateException: Expected BEGIN_ARRAY but was BEGIN_OBJECT at line 1 column 2 path $
@@ -27,7 +27,7 @@ com.google.gson.JsonSyntaxException: java.lang.IllegalStateException: Expected B
 	at com.google.gson.Gson.fromJson(Gson.java:956)
 	at com.google.gson.Gson.fromJson(Gson.java:905)
 	at ai.glog.service.GlogService.getFromGlog(GlogService.java:174)
-	at ai.glog.execute.workers.TriageAndRemediationCallableWorker.setGeneralRemediation(TriageAndRemediationCallableWorker.java:209)
+	at ai.glog.execute.workers.TriageAndRemediationCallableWorker.setGeneralRemediation(TriageAndRemediationCallableWorker.java:212)
 	at ai.glog.execute.workers.TriageAndRemediationCallableWorker.call(TriageAndRemediationCallableWorker.java:64)
 	at ai.glog.execute.workers.TriageAndRemediationCallableWorker.call(TriageAndRemediationCallableWorker.java:32)
 	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)

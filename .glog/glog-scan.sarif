@@ -34,24 +34,46 @@
               }
             },
             {
-              "id": "06a136dc-bf6e-31a9-9a46-82ddd9a36546",
-              "name": "\"XSS Vulnerabilities from User-Controlled Data in Methods like `innerHTML`, `outerHTML`, or `document.write`\"",
+              "id": "e9716859-2317-3113-bda0-982dcfcd903d",
+              "name": "\"Dockerfile Vulnerability: Missing '--no-install-recommends' Flag in 'apt-get' Command\"",
               "helpUri": "https://www.glog.ai/",
               "help": {
                 "text": "",
-                "markdown": "## Description\n\nCross-Site Scripting (XSS) vulnerabilities occur when an application includes untrusted data in a new web page without proper validation or escaping, or updates an existing web page with user-supplied data using a browser API that can create HTML or JavaScript. XSS allows attackers to execute scripts in the victim's browser which can hijack user sessions, deface web sites, or redirect the user to malicious sites.\n\nIn JavaScript, methods like `innerHTML`, `outerHTML`, or `document.write` can introduce XSS vulnerabilities when they are used to add user-controlled data to the DOM. The specific sink in the provided code is `innerHTML`.\n\n```javascript\ndocument.getElementById(\"answer\").innerHTML = obj['answer'];\n```\n\nIn this code, if `obj['answer']` contains malicious script, it will be executed when the HTML is rendered by the browser.\n\n## Mitigation Advice\n\nTo mitigate XSS vulnerabilities, you should:\n\n- Use the principle of least privilege: Only allow necessary permissions for the code that handles user input.\n- Validate input: Ensure that user input matches expected patterns.\n- Escape untrusted HTTP request data: HTML, URL, JavaScript, CSS, and attribute escaping should be applied.\n- Use secure APIs: These APIs automatically handle the escaping of user input.\n- Use Content Security Policy (CSP): This can help to mitigate the impact of any successful XSS attack.\n\n## Source Code Fix Recommendation\n\nA safer way to add user-controlled data to the DOM is to use `textContent` instead of `innerHTML`. `textContent` does not parse HTML and therefore, any malicious script included in the user input will not be executed.\n\n```javascript\ndocument.getElementById(\"answer\").textContent = obj['answer'];\n```\n\n## Library Dependencies\n\nThe provided code does not require any library dependencies to execute properly.\n\n## References\n\n- [OWASP XSS (Cross Site Scripting) Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)\n- [OWASP DOM based XSS Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html)\n- [CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')](https://cwe.mitre.org/data/definitions/79.html)"
+                "markdown": "## Description\n\nThe Dockerfile vulnerability: Missing '--no-install-recommends' flag in 'apt-get' command is a security concern that arises when Docker images are built without the '--no-install-recommends' flag in the 'apt-get' command. This flag is used to prevent the installation of unnecessary packages that are not explicitly specified but are recommended by the packages that are being installed. \n\n## Security Concern\n\nThe absence of the '--no-install-recommends' flag can lead to the installation of unnecessary packages, which can increase the attack surface of the Docker image. Each additional package that is installed can potentially contain vulnerabilities that can be exploited by an attacker. Furthermore, these unnecessary packages can consume additional disk space and slow down the build process.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to always use the '--no-install-recommends' flag when installing packages with 'apt-get' in a Dockerfile. This will ensure that only the necessary packages are installed and reduce the attack surface of the Docker image.\n\n## Source Code Fix Recommendation\n\nHere is the fixed version of the provided Dockerfile code:\n\n```Dockerfile\nRUN apt-get update \\\n && export DEBIAN_FRONTEND=noninteractive \\\n && apt-get install --no-install-recommends -y zlib1g-dev libpng-dev libjpeg-dev libfreetype6-dev iputils-ping git \\\n && apt-get clean -y && rm -rf /var/lib/apt/lists/* \\\n && docker-php-ext-configure gd --with-jpeg --with-freetype \\\n && a2enmod rewrite \\\n # Use pdo_sqlite instead of pdo_mysql if you want to use sqlite\n && docker-php-ext-install gd mysqli pdo pdo_mysql\n```\n\n## Library Dependencies\n\nThe code example requires the following library dependencies to execute properly:\n\n- zlib1g-dev\n- libpng-dev\n- libjpeg-dev\n- libfreetype6-dev\n- iputils-ping\n- git\n- gd\n- mysqli\n- pdo\n- pdo_mysql\n\n## References\n\n- [OWASP Docker Security](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html)\n- [CWE-749: Exposed Dangerous Method or Function](https://cwe.mitre.org/data/definitions/749.html)"
               },
               "properties": {
                 "cwe": [
                   {
-                    "id": "CWE-79",
-                    "url": "https://cwe.mitre.org/data/definitions/79.html"
+                    "id": "CWE-749",
+                    "url": "https://cwe.mitre.org/data/definitions/749.html"
                   }
                 ],
-                "severity": "MEDIUM",
+                "severity": "HIGH",
                 "kind": "FAIL",
                 "tags": [
-                  "CWE-79"
+                  "CWE-749"
+                ]
+              }
+            },
+            {
+              "id": "1e7a0aec-ff96-3257-906f-2024ddad75f9",
+              "name": "High-Risk Dockerfile Vulnerability: Lack of Non-Root User Specification",
+              "helpUri": "https://www.glog.ai/",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe \"High-Risk Dockerfile Vulnerability: Lack of Non-Root User Specification\" is a common security vulnerability in Docker where the Dockerfile does not specify a non-root user for running the container. By default, Docker runs containers as root which can pose a significant security risk. If an attacker manages to break out from the container, they could gain root access to the Docker host.\n\n## Security Concern\n\nRunning Docker containers as root is a security concern because it provides the container with potentially dangerous elevated privileges. If an attacker manages to exploit a vulnerability within the container or the application it's running, they could escape the container and gain root access to the host system. This would give them the ability to execute arbitrary commands, alter system configurations, or even install malicious software.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to always run containers as a non-root user. This can be achieved by creating a new user in the Dockerfile and switching to this user before the application is run.\n\n## Source Code Fix Recommendation\n\nHere is a fix for the provided Dockerfile:\n\n```Dockerfile\nFROM docker.io/library/php:8-apache\n\n# Create a new user 'myuser'\nRUN useradd -m myuser\n\n# Switch to 'myuser'\nUSER myuser\n```\n\nIn this Dockerfile, a new user 'myuser' is created and then the USER instruction is used to switch to this user. This ensures that the container is not run as root.\n\n## References\n\n- [CWE-250: Execution with Unnecessary Privileges](https://cwe.mitre.org/data/definitions/250.html)\n\nPlease note that the provided links are active and accessible for anonymous users at the time of writing this report."
+              },
+              "properties": {
+                "cwe": [
+                  {
+                    "id": "CWE-250",
+                    "url": "https://cwe.mitre.org/data/definitions/250.html"
+                  }
+                ],
+                "severity": "HIGH",
+                "kind": "FAIL",
+                "tags": [
+                  "CWE-250"
                 ]
               }
             },
@@ -84,28 +106,6 @@
               "help": {
                 "text": "",
                 "markdown": "## Description\n\nCross-Site Scripting (XSS) vulnerabilities occur when data enters a program from an untrusted source and the data is used to generate dynamic HTML content. An attacker can inject malicious scripts into the HTML content, which will be executed by the victim's browser. In the given code snippet, the `theme` variable is directly concatenated into the cookie string without any sanitization or encoding, which could lead to a potential XSS vulnerability if the `theme` variable is controlled by the user.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, you should always validate, sanitize, and/or escape user input before using it to generate HTML content. In this case, you should ensure that the `theme` variable does not contain any special characters that could be used to inject malicious scripts.\n\n## Source Code Fix Recommendation\n\n```javascript\n// Assuming theme is user-controlled\nvar theme = request.getParameter(\"theme\");\n\n// Encode the theme variable to prevent XSS\nvar encodedTheme = encodeURIComponent(theme);\n\n// Use the encoded theme variable in the cookie string\ndocument.cookie = \"theme=\" + encodedTheme + \"; path=/\";\n```\n\nThis code uses the `encodeURIComponent` function to encode the `theme` variable, which will prevent any special characters from being interpreted as part of the HTML content.\n\n## Library Dependencies\n\nThe given code snippet does not require any library dependencies to execute properly.\n\n## OWASP Resources\n\n- [OWASP XSS Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)\n- [OWASP DOM based XSS Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html)\n\n## Common Weakness Enumeration (CWE)\n\n- [CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')](https://cwe.mitre.org/data/definitions/79.html)"
-              },
-              "properties": {
-                "cwe": [
-                  {
-                    "id": "CWE-79",
-                    "url": "https://cwe.mitre.org/data/definitions/79.html"
-                  }
-                ],
-                "severity": "MEDIUM",
-                "kind": "FAIL",
-                "tags": [
-                  "CWE-79"
-                ]
-              }
-            },
-            {
-              "id": "d91365c9-0c54-331a-abe9-2d55dcd61ef9",
-              "name": "\"XSS Vulnerabilities from User-Controlled Data in Methods like `innerHTML`, `outerHTML`, or `document.write`\"",
-              "helpUri": "https://www.glog.ai/",
-              "help": {
-                "text": "",
-                "markdown": "## Description\n\nCross-Site Scripting (XSS) vulnerabilities occur when an application includes untrusted data in a new web page without proper validation or escaping, or updates an existing web page with user-supplied data using a browser API that can create HTML or JavaScript. XSS allows attackers to execute scripts in the victim's browser which can hijack user sessions, deface web sites, or redirect the user to malicious sites.\n\nIn the provided code snippet, the `innerHTML` method is used to insert user-controlled data into the HTML document. This is a common source of XSS vulnerabilities because it allows the insertion of arbitrary HTML, including script tags and event handlers.\n\n## Mitigation Advice\n\nTo mitigate XSS vulnerabilities, you should:\n\n- Use context-specific output encoding/escaping before inserting untrusted data into HTML element content or attribute.\n- Use secure methods instead of `innerHTML`, `outerHTML`, or `document.write`. For example, use `textContent` instead of `innerHTML` when setting text content.\n- Validate and sanitize user input to ensure it does not contain malicious scripts.\n\n## Source Code Fix\n\nHere is a recommended fix for the provided code snippet:\n\n```javascript\nlet button = document.createElement('input');\nbutton.type = 'button';\nbutton.value = 'Update';\nbutton.onclick = function() { submit_change(user['user_id']); };\ncell3.appendChild(button);\n```\n\nIn this fix, we create the button element using `document.createElement` and set its properties directly, instead of using `innerHTML` to parse a string of HTML. This ensures that no arbitrary HTML can be injected into the document.\n\n## Library Dependencies\n\nThe provided code snippet does not appear to have any library dependencies. It uses only standard JavaScript and DOM API features.\n\n## References\n\n- [OWASP XSS Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)\n- [OWASP DOM based XSS Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html)\n- [CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')](https://cwe.mitre.org/data/definitions/79.html)"
               },
               "properties": {
                 "cwe": [
@@ -166,28 +166,6 @@
               }
             },
             {
-              "id": "4b61b340-44c2-36c1-97ba-d367b5819328",
-              "name": "\"Potential XSS Vulnerability from User-Controlled Data in HTML String\"",
-              "helpUri": "https://www.glog.ai/",
-              "help": {
-                "text": "",
-                "markdown": "## Description\n\nA potential Cross-Site Scripting (XSS) vulnerability from user-controlled data in HTML string exists when an application includes untrusted data in a new HTML document without proper validation or escaping. This allows attackers to execute scripts in the victim's browser which can hijack user sessions, deface web sites, or redirect the user to malicious sites.\n\nIn the provided JavaScript code, the `id` variable is directly concatenated into the HTML string which is then used to get the value of an element. If the `id` variable is controlled by the user and not properly sanitized, it can lead to an XSS vulnerability.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, you should:\n\n1. **Validate Input:** Ensure that all user-supplied input is validated before it is processed. Use a whitelist of allowed inputs rather than trying to filter out bad inputs.\n\n2. **Escape Untrusted Data:** If user data is inserted into HTML, JavaScript, CSS, or other web content, it should be properly escaped to prevent it from being interpreted as code.\n\n3. **Use Safe APIs:** Some APIs provide automatic escaping to prevent XSS vulnerabilities. For example, the `textContent` property in JavaScript automatically escapes HTML tags.\n\n## Source Code Fix Recommendation\n\nA safer version of the provided code would look like this:\n\n```javascript\nlet elementId = 'surname_' + encodeURIComponent(id);\nsurname = document.getElementById(elementId).value;\n```\n\nIn this version, the `encodeURIComponent` function is used to encode the `id` variable, ensuring that it cannot be used to inject malicious code.\n\n## Library Dependencies\n\nThe provided code does not require any additional library dependencies to execute properly.\n\n## References\n\n- [OWASP XSS Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)\n- [OWASP DOM based XSS Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html)\n- [CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')](https://cwe.mitre.org/data/definitions/79.html)"
-              },
-              "properties": {
-                "cwe": [
-                  {
-                    "id": "CWE-79",
-                    "url": "https://cwe.mitre.org/data/definitions/79.html"
-                  }
-                ],
-                "severity": "MEDIUM",
-                "kind": "FAIL",
-                "tags": [
-                  "CWE-79"
-                ]
-              }
-            },
-            {
               "id": "7b4e5d38-189e-34d1-8525-cc834f0f27df",
               "name": "Unhandled Promise Rejection Vulnerability",
               "helpUri": "https://www.glog.ai/",
@@ -210,12 +188,34 @@
               }
             },
             {
-              "id": "ea7c8411-9dbf-3eb9-9593-fbb32032a2a7",
-              "name": "\"XSS Vulnerability from User-Controlled Data in `cell0`\"",
+              "id": "4b61b340-44c2-36c1-97ba-d367b5819328",
+              "name": "\"Potential XSS Vulnerability from User-Controlled Data in HTML String\"",
               "helpUri": "https://www.glog.ai/",
               "help": {
                 "text": "",
-                "markdown": "## Description\n\nThe code snippet provided is vulnerable to Cross-Site Scripting (XSS) attacks. XSS is a type of injection, in which malicious scripts are injected into otherwise benign and trusted websites. In this case, the vulnerability arises from the fact that user-controlled data (`user['user_id']`) is directly used in the `innerHTML` property of `cell0` without any sanitization or encoding. This allows an attacker to inject arbitrary HTML or JavaScript code, which will be executed in the context of the victim's browser.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, you should always treat user input as untrusted data. You should use context-specific output encoding/escaping techniques on all user-supplied data before including it in HTML output. \n\n## Source Code Fix Recommendation\n\nA simple fix would be to use `textContent` instead of `innerHTML` when setting the text of the `cell0` element. This ensures that the user input is treated as plain text and not parsed as HTML. \n\n```javascript\ncell0.textContent = user['user_id'];\ncell0.innerHTML += '<input type=\"hidden\" id=\"user_id_' + user['user_id'] + '\" name=\"user_id\" value=\"' + user['user_id'] + '\" />';\n```\n\n## Library Dependencies\n\nThe code snippet does not appear to have any specific library dependencies.\n\n## References\n\n- [OWASP XSS Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)\n- [CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')](https://cwe.mitre.org/data/definitions/79.html)"
+                "markdown": "## Description\n\nA potential Cross-Site Scripting (XSS) vulnerability from user-controlled data in HTML string exists when an application includes untrusted data in a new HTML document without proper validation or escaping. This allows attackers to execute scripts in the victim's browser which can hijack user sessions, deface web sites, or redirect the user to malicious sites.\n\nIn the provided JavaScript code, the `id` variable is directly concatenated into the HTML string which is then used to get the value of an element. If the `id` variable is controlled by the user and not properly sanitized, it can lead to an XSS vulnerability.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, you should:\n\n1. **Validate Input:** Ensure that all user-supplied input is validated before it is processed. Use a whitelist of allowed inputs rather than trying to filter out bad inputs.\n\n2. **Escape Untrusted Data:** If user data is inserted into HTML, JavaScript, CSS, or other web content, it should be properly escaped to prevent it from being interpreted as code.\n\n3. **Use Safe APIs:** Some APIs provide automatic escaping to prevent XSS vulnerabilities. For example, the `textContent` property in JavaScript automatically escapes HTML tags.\n\n## Source Code Fix Recommendation\n\nA safer version of the provided code would look like this:\n\n```javascript\nlet elementId = 'surname_' + encodeURIComponent(id);\nsurname = document.getElementById(elementId).value;\n```\n\nIn this version, the `encodeURIComponent` function is used to encode the `id` variable, ensuring that it cannot be used to inject malicious code.\n\n## Library Dependencies\n\nThe provided code does not require any additional library dependencies to execute properly.\n\n## References\n\n- [OWASP XSS Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)\n- [OWASP DOM based XSS Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html)\n- [CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')](https://cwe.mitre.org/data/definitions/79.html)"
+              },
+              "properties": {
+                "cwe": [
+                  {
+                    "id": "CWE-79",
+                    "url": "https://cwe.mitre.org/data/definitions/79.html"
+                  }
+                ],
+                "severity": "MEDIUM",
+                "kind": "FAIL",
+                "tags": [
+                  "CWE-79"
+                ]
+              }
+            },
+            {
+              "id": "ea7c8411-9dbf-3eb9-9593-fbb32032a2a7",
+              "name": "\"XSS Vulnerability Risk in User-Controlled Data within `cell0.innerHTML`\"",
+              "helpUri": "https://www.glog.ai/",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe code snippet provided is vulnerable to Cross-Site Scripting (XSS) attacks. XSS is a type of injection security vulnerability where an attacker can inject malicious scripts into web pages viewed by other users. In this case, the vulnerability arises from the use of `innerHTML` to insert user-controlled data (`user['user_id']`) into the HTML content of `cell0`. If an attacker can control the value of `user['user_id']`, they can inject arbitrary HTML or JavaScript code, which will be executed when the page is loaded.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, you should avoid using `innerHTML` to insert user-controlled data into your HTML. Instead, use safer methods like `textContent` or `innerText` which do not interpret the inserted data as HTML. If you need to insert HTML content, make sure to properly sanitize the user-controlled data to remove any potentially harmful code.\n\n## Source Code Fix Recommendation\n\nHere is a safer version of your code:\n\n```javascript\nlet userId = user['user_id'];\nlet inputElement = document.createElement('input');\ninputElement.type = 'hidden';\ninputElement.id = 'user_id_' + userId;\ninputElement.name = 'user_id';\ninputElement.value = userId;\n\nlet textNode = document.createTextNode(userId);\ncell0.appendChild(textNode);\ncell0.appendChild(inputElement);\n```\n\nIn this version, we create the input element using `document.createElement` and set its properties directly, instead of constructing an HTML string. This ensures that the user-controlled data is treated as plain text and not interpreted as HTML.\n\n## Library Dependencies\n\nThe code does not require any library dependencies to execute properly.\n\n## References\n\n- [OWASP XSS (Cross Site Scripting) Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)\n- [CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')](https://cwe.mitre.org/data/definitions/79.html)"
               },
               "properties": {
                 "cwe": [
@@ -233,11 +233,11 @@
             },
             {
               "id": "0afceef3-d05c-3cf4-9dd6-545b67ab656a",
-              "name": "\"XSS Vulnerability from User-Controlled Data in `cell1`\"",
+              "name": "\"XSS Vulnerability Risk in User-Controlled Data within `cell1.innerHTML`\"",
               "helpUri": "https://www.glog.ai/",
               "help": {
                 "text": "",
-                "markdown": "## Description\n\nCross-Site Scripting (XSS) vulnerabilities occur when an application includes untrusted data in a new web page without proper validation or escaping, or updates an existing web page with user-supplied data using a browser API that can create HTML or JavaScript. XSS allows attackers to execute scripts in the victim's browser which can hijack user sessions, deface web sites, or redirect the user to malicious sites.\n\nIn the provided JavaScript code, the XSS vulnerability arises from the user-controlled data in `cell1`. The `innerHTML` property is being used to add HTML code to `cell1`. However, the user's ID and first name are being directly inserted into the HTML string without any sanitization or encoding. If an attacker can control the `user_id` or `first_name` values, they could inject malicious scripts.\n\n## Mitigation Advice\n\nTo mitigate XSS vulnerabilities, you should:\n\n- Use the principle of least privilege. Only allow necessary permissions for the user.\n- Validate and sanitize user input. Never trust user input.\n- Use output encoding libraries to ensure that the output is encoded to the context in which it is being inserted into the HTML.\n- Use appropriate response headers to prevent XSS in HTTP responses.\n\n## Source Code Fix\n\nA simple fix for this specific vulnerability would be to use `textContent` instead of `innerHTML` when inserting user-controlled data into the HTML. This ensures that the user-controlled data is treated as text and not as HTML code.\n\n```javascript\nlet input = document.createElement('input');\ninput.type = 'text';\ninput.id = 'first_name_' + user['user_id'];\ninput.name = 'first_name';\ninput.value = user['first_name'];\ncell1.appendChild(input);\n```\n\n## Library Dependencies\n\nThe provided code does not require any additional library dependencies to execute properly.\n\n## References\n\n- [OWASP XSS (Cross Site Scripting) Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)\n- [OWASP DOM based XSS Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html)\n- [CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')](https://cwe.mitre.org/data/definitions/79.html)"
+                "markdown": "## Description\n\nThe code snippet provided is vulnerable to Cross-Site Scripting (XSS) attacks. XSS is a type of injection security vulnerability where an attacker can inject malicious scripts into web pages viewed by other users. In this case, the vulnerability arises from the fact that user-controlled data (`user['user_id']` and `user['first_name']`) is directly used in the `innerHTML` property of an HTML element without proper sanitization or encoding. An attacker could potentially manipulate these values to inject malicious scripts, which would then be executed in the context of the victim's browser session.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, you should always sanitize and/or escape user-controlled data before using it in your HTML content. This can be done using various methods, such as HTML encoding, JavaScript encoding, CSS encoding, URL encoding, etc., depending on the context in which the data is used.\n\n## Source Code Fix Recommendation\n\nA simple fix for this specific vulnerability would be to use `textContent` instead of `innerHTML` when inserting user-controlled data into the HTML element. This ensures that the user-controlled data is treated as plain text and not as HTML code. Here's how you can modify the code:\n\n```javascript\nvar input = document.createElement('input');\ninput.type = 'text';\ninput.id = 'first_name_' + user['user_id'];\ninput.name = 'first_name';\ninput.value = user['first_name'];\ncell1.appendChild(input);\n```\n\n## Library Dependencies\n\nThe code example does not require any library dependencies to execute properly.\n\n## References\n\n- [OWASP XSS (Cross Site Scripting) Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)\n- [OWASP DOM based XSS Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html)\n- [CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')](https://cwe.mitre.org/data/definitions/79.html)"
               },
               "properties": {
                 "cwe": [
@@ -255,11 +255,55 @@
             },
             {
               "id": "c6ed0a89-b76b-3401-9cfa-96e01a5d277a",
-              "name": "\"XSS Vulnerability Risk in User-Controlled Data within `cell2.innerHTML`\"",
+              "name": "\"Cell2 User-Controlled Data Anti-Pattern XSS Vulnerability\"",
               "helpUri": "https://www.glog.ai/",
               "help": {
                 "text": "",
-                "markdown": "## Description\n\nThe code snippet provided is vulnerable to Cross-Site Scripting (XSS) attacks. XSS is a type of injection security vulnerability where an attacker can inject malicious scripts into webpages viewed by other users. In this case, the vulnerability arises from the fact that the `innerHTML` property is being used to directly insert user-controlled data (`user['user_id']` and `user['surname']`) into the HTML content of `cell2`. If an attacker can control the `user_id` or `surname` values, they can inject malicious scripts that will be executed when the HTML content is rendered by a web browser.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, you should avoid directly inserting user-controlled data into HTML content. Instead, use text content property or methods that automatically encode HTML entities. If you must insert user-controlled data into HTML content, ensure that the data is properly sanitized and encoded to prevent the execution of any injected scripts.\n\n## Source Code Fix Recommendation\n\nA safer way to create the HTML content would be to create the elements using the DOM API, which automatically encodes HTML entities:\n\n```javascript\nlet input = document.createElement('input');\ninput.type = 'text';\ninput.id = 'surname_' + user['user_id'];\ninput.name = 'surname';\ninput.value = user['surname'];\ncell2.appendChild(input);\n```\n\n## Library Dependencies\n\nThe code example does not require any library dependencies to execute properly.\n\n## OWASP and CWE Resources\n\n- [OWASP XSS (Cross Site Scripting) Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)\n- [CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')](https://cwe.mitre.org/data/definitions/79.html)"
+                "markdown": "## Description\n\nThe \"Cell2 User-Controlled Data Anti-Pattern XSS Vulnerability\" is a type of Cross-Site Scripting (XSS) vulnerability that occurs when user-controlled data is directly included into a HTML context without proper sanitization or encoding. In the provided code snippet, the user's ID and surname are directly concatenated into the HTML string, which is then assigned to the `innerHTML` property of a cell. If the user's ID or surname contains malicious script, it will be executed when the HTML is rendered in the browser.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, you should always sanitize and/or encode user-controlled data before including it in a HTML context. Sanitization involves removing or replacing any potentially harmful characters or sequences of characters. Encoding involves converting potentially harmful characters into a safe format that can be included in HTML without risk of execution.\n\n## Source Code Fix Recommendation\n\nHere is a simple fix using JavaScript's built-in `textContent` property, which automatically encodes all HTML entities:\n\n```javascript\nvar input = document.createElement('input');\ninput.type = 'text';\ninput.id = 'surname_' + user['user_id'];\ninput.name = 'surname';\ninput.value = user['surname'];\ncell2.appendChild(input);\n```\n\n## Library Dependencies\n\nThe provided code snippet does not require any library dependencies to execute properly.\n\n## OWASP and CWE Resources\n\n- [OWASP XSS (Cross Site Scripting) Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)\n- [CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')](https://cwe.mitre.org/data/definitions/79.html)"
+              },
+              "properties": {
+                "cwe": [
+                  {
+                    "id": "CWE-79",
+                    "url": "https://cwe.mitre.org/data/definitions/79.html"
+                  }
+                ],
+                "severity": "MEDIUM",
+                "kind": "FAIL",
+                "tags": [
+                  "CWE-79"
+                ]
+              }
+            },
+            {
+              "id": "06a136dc-bf6e-31a9-9a46-82ddd9a36546",
+              "name": "\"XSS Vulnerabilities from User-Controlled Data in Methods like `innerHTML`, `outerHTML`, or `document.write`\"",
+              "helpUri": "https://www.glog.ai/",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nCross-Site Scripting (XSS) vulnerabilities occur when an application includes untrusted data in a new web page without proper validation or escaping, or updates an existing web page with user-supplied data using a browser API that can create HTML or JavaScript. XSS allows attackers to execute scripts in the victim's browser which can hijack user sessions, deface web sites, or redirect the user to malicious sites.\n\nIn JavaScript, methods like `innerHTML`, `outerHTML`, or `document.write` can introduce XSS vulnerabilities when they are used to add user-controlled data to the DOM. The specific sink in the provided code is `innerHTML`.\n\n```javascript\ndocument.getElementById(\"answer\").innerHTML = obj['answer'];\n```\n\nIn this code, if `obj['answer']` contains malicious script, it will be executed when the HTML is rendered by the browser.\n\n## Mitigation Advice\n\nTo mitigate XSS vulnerabilities, you should:\n\n- Use the principle of least privilege: Only allow necessary permissions for the code that handles user input.\n- Validate input: Ensure that user input matches expected patterns.\n- Escape untrusted HTTP request data: HTML, URL, JavaScript, CSS, and attribute escaping should be applied.\n- Use secure APIs: These APIs automatically handle the escaping of user input.\n- Use Content Security Policy (CSP): This can help to mitigate the impact of any successful XSS attack.\n\n## Source Code Fix Recommendation\n\nA safer way to add user-controlled data to the DOM is to use `textContent` instead of `innerHTML`. `textContent` does not parse HTML and therefore, any malicious script included in the user input will not be executed.\n\n```javascript\ndocument.getElementById(\"answer\").textContent = obj['answer'];\n```\n\n## Library Dependencies\n\nThe provided code does not require any library dependencies to execute properly.\n\n## References\n\n- [OWASP XSS (Cross Site Scripting) Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)\n- [OWASP DOM based XSS Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html)\n- [CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')](https://cwe.mitre.org/data/definitions/79.html)"
+              },
+              "properties": {
+                "cwe": [
+                  {
+                    "id": "CWE-79",
+                    "url": "https://cwe.mitre.org/data/definitions/79.html"
+                  }
+                ],
+                "severity": "MEDIUM",
+                "kind": "FAIL",
+                "tags": [
+                  "CWE-79"
+                ]
+              }
+            },
+            {
+              "id": "d91365c9-0c54-331a-abe9-2d55dcd61ef9",
+              "name": "\"XSS Vulnerability from User-Controlled Data in `cell3`\"",
+              "helpUri": "https://www.glog.ai/",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nCross-Site Scripting (XSS) vulnerabilities occur when data enters a program from an untrusted source and is used to generate dynamic HTML content. The `cell3.innerHTML` in the provided JavaScript code is vulnerable to XSS because it directly includes user-controlled data (`user['user_id']`) in the generated HTML. An attacker could manipulate the `user_id` to inject malicious scripts, which would then be executed in the browser of any user viewing the generated HTML.\n\n## Mitigation Advice\n\nTo mitigate XSS vulnerabilities, you should always properly escape untrusted data based on the HTML context (body, attribute, JavaScript, CSS, or URL) that the data will be placed into. In this case, since the user-controlled data is being placed into a JavaScript context within an HTML attribute, you should use JavaScript escaping before including the data.\n\n## Source Code Fix Recommendation\n\n```javascript\ncell3.innerHTML = '<input type=\"button\" value=\"Update\" onclick=\"submit_change(' + encodeURIComponent(user['user_id']) + ')\" />';\n```\n\nIn the above code, `encodeURIComponent` is used to escape the user-controlled data. This function encodes special characters. In addition, it encodes the following characters: `, / ? : @ & = + $ #`.\n\n## Library Dependencies\n\nThe provided code snippet does not appear to have any library dependencies.\n\n## References\n\n- [OWASP XSS (Cross Site Scripting) Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)\n- [OWASP DOM based XSS Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html)\n- [CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')](https://cwe.mitre.org/data/definitions/79.html)"
               },
               "properties": {
                 "cwe": [
@@ -286,41 +330,6 @@
       },
       "language": "en-US",
       "results": [
-        {
-          "ruleId": "1b154d58-a91f-3f6f-9258-2d96f6528c2c",
-          "kind": "fail",
-          "level": "warning",
-          "message": {
-            "text": "\"Alert() Call Vulnerability in Production Code\""
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "dvwa/js/dvwaPage.js",
-                  "uriBaseId": "%SRCROOT%"
-                },
-                "region": {
-                  "startLine": 16,
-                  "startColumn": 5,
-                  "endLine": 16,
-                  "endColumn": 20,
-                  "snippet": {
-                    "text": "    alert(alerttxt);return false;"
-                  }
-                }
-              }
-            }
-          ],
-          "partialFingerprints": {
-            "glog-pfp-ruleFileLineCode/v1": "8807a278726a1df50e92e3aa8a3db46ca78d3879d12a854f81cc3d59394e9f52",
-            "glog-pfp-ruleFileCode/v1": "fc616e5ba60048bebfb27ddc2840d6355dabab725e4a29be7c1986f9909c85a3"
-          },
-          "fingerprints": {
-            "glog-fp-ruleFileCode/v1": "fc616e5ba60048bebfb27ddc2840d6355dabab725e4a29be7c1986f9909c85a3"
-          },
-          "properties": {}
-        },
         {
           "ruleId": "6fe70cec-54d3-31e9-8045-99d69ea1f17a",
           "kind": "fail",
@@ -353,41 +362,6 @@
           },
           "fingerprints": {
             "glog-fp-ruleFileCode/v1": "1b5632dfa8b08ffff4a8512ed7ce9dce46fd307a9b9b3ecb7543965a5ce04fee"
-          },
-          "properties": {}
-        },
-        {
-          "ruleId": "0afceef3-d05c-3cf4-9dd6-545b67ab656a",
-          "kind": "fail",
-          "level": "warning",
-          "message": {
-            "text": "\"XSS Vulnerabilities from User-Controlled Data in Methods like `innerHTML`, `outerHTML`, or `document.write`\""
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "vulnerabilities/authbypass/authbypass.js",
-                  "uriBaseId": "%SRCROOT%"
-                },
-                "region": {
-                  "startLine": 45,
-                  "startColumn": 4,
-                  "endLine": 45,
-                  "endColumn": 139,
-                  "snippet": {
-                    "text": "\t\t\tcell1.innerHTML = '<input type=\"text\" id=\"first_name_' + user['user_id'] + '\" name=\"first_name\" value=\"' + user['first_name'] + '\" />';"
-                  }
-                }
-              }
-            }
-          ],
-          "partialFingerprints": {
-            "glog-pfp-ruleFileLineCode/v1": "adfbe6e4087cbadd19496342eb038d537314c13305889f4cea1af4b7279dd109",
-            "glog-pfp-ruleFileCode/v1": "0027f6b7d4c2c55862186693fbeea7f40c8f116c12371367afdf0e20f335580e"
-          },
-          "fingerprints": {
-            "glog-fp-ruleFileCode/v1": "0027f6b7d4c2c55862186693fbeea7f40c8f116c12371367afdf0e20f335580e"
           },
           "properties": {}
         },
@@ -462,6 +436,76 @@
           "properties": {}
         },
         {
+          "ruleId": "1b154d58-a91f-3f6f-9258-2d96f6528c2c",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "\"Alert() Call Vulnerability in Production Code\""
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "dvwa/js/dvwaPage.js",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 16,
+                  "startColumn": 5,
+                  "endLine": 16,
+                  "endColumn": 20,
+                  "snippet": {
+                    "text": "    alert(alerttxt);return false;"
+                  }
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "glog-pfp-ruleFileLineCode/v1": "8807a278726a1df50e92e3aa8a3db46ca78d3879d12a854f81cc3d59394e9f52",
+            "glog-pfp-ruleFileCode/v1": "fc616e5ba60048bebfb27ddc2840d6355dabab725e4a29be7c1986f9909c85a3"
+          },
+          "fingerprints": {
+            "glog-fp-ruleFileCode/v1": "fc616e5ba60048bebfb27ddc2840d6355dabab725e4a29be7c1986f9909c85a3"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "0afceef3-d05c-3cf4-9dd6-545b67ab656a",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "\"XSS Vulnerabilities from User-Controlled Data in Methods like `innerHTML`, `outerHTML`, or `document.write`\""
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "vulnerabilities/authbypass/authbypass.js",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 45,
+                  "startColumn": 4,
+                  "endLine": 45,
+                  "endColumn": 139,
+                  "snippet": {
+                    "text": "\t\t\tcell1.innerHTML = '<input type=\"text\" id=\"first_name_' + user['user_id'] + '\" name=\"first_name\" value=\"' + user['first_name'] + '\" />';"
+                  }
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "glog-pfp-ruleFileLineCode/v1": "adfbe6e4087cbadd19496342eb038d537314c13305889f4cea1af4b7279dd109",
+            "glog-pfp-ruleFileCode/v1": "0027f6b7d4c2c55862186693fbeea7f40c8f116c12371367afdf0e20f335580e"
+          },
+          "fingerprints": {
+            "glog-fp-ruleFileCode/v1": "0027f6b7d4c2c55862186693fbeea7f40c8f116c12371367afdf0e20f335580e"
+          },
+          "properties": {}
+        },
+        {
           "ruleId": "a033af7e-61a6-3963-92e2-6c1aa3bebaec",
           "kind": "fail",
           "level": "warning",
@@ -495,6 +539,80 @@
             "glog-fp-ruleFileCode/v1": "22256f2c82a1ea2fa81ca9942a1d2f308f112e0cc4bc390f0e253e8e7e11409b"
           },
           "properties": {}
+        },
+        {
+          "ruleId": "e9716859-2317-3113-bda0-982dcfcd903d",
+          "kind": "fail",
+          "level": "error",
+          "message": {
+            "text": "\"Dockerfile Vulnerability: Missing '--no-install-recommends' Flag in 'apt-get' Command\""
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Dockerfile",
+                  "uriBaseId": "ROOTPATH"
+                },
+                "region": {
+                  "startLine": 10,
+                  "startColumn": 1,
+                  "endLine": 17,
+                  "endColumn": 1,
+                  "snippet": {
+                    "text": "RUN apt-get update \\\n && export DEBIAN_FRONTEND=noninteractive \\\n && apt-get install -y zlib1g-dev libpng-dev libjpeg-dev libfreetype6-dev iputils-ping git \\\n && apt-get clean -y && rm -rf /var/lib/apt/lists/* \\\n && docker-php-ext-configure gd --with-jpeg --with-freetype \\\n && a2enmod rewrite \\\n # Use pdo_sqlite instead of pdo_mysql if you want to use sqlite\n && docker-php-ext-install gd mysqli pdo pdo_mysql"
+                  }
+                }
+              },
+              "message": {
+                "text": "Dockerfile"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "glog-pfp-ruleFileLineCode/v1": "19b64105124c3edd32e7cf754014ad476d4cf774b6efa1377e56c20de22f4147",
+            "glog-pfp-ruleFileCode/v1": "82dac9b7c739d76e949f6b39abfab28ce453bd42a9671b4e08683ea91575415a"
+          },
+          "fingerprints": {
+            "glog-fp-ruleFileCode/v1": "82dac9b7c739d76e949f6b39abfab28ce453bd42a9671b4e08683ea91575415a"
+          }
+        },
+        {
+          "ruleId": "1e7a0aec-ff96-3257-906f-2024ddad75f9",
+          "kind": "fail",
+          "level": "error",
+          "message": {
+            "text": "High-Risk Dockerfile Vulnerability: Lack of Non-Root User Specification"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Dockerfile",
+                  "uriBaseId": "ROOTPATH"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1,
+                  "snippet": {
+                    "text": "FROM docker.io/library/php:8-apache"
+                  }
+                }
+              },
+              "message": {
+                "text": "Dockerfile"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "glog-pfp-ruleFileLineCode/v1": "137563db576640ce095f73d0b858df68616610bda114ebbbeaf2bd85962b8314",
+            "glog-pfp-ruleFileCode/v1": "21fdc93d552d18c1739cad25b9dfdd063a5213d780eb86ef361bef1c0819a634"
+          },
+          "fingerprints": {
+            "glog-fp-ruleFileCode/v1": "21fdc93d552d18c1739cad25b9dfdd063a5213d780eb86ef361bef1c0819a634"
+          }
         },
         {
           "ruleId": "c6ed0a89-b76b-3401-9cfa-96e01a5d277a",
@@ -567,41 +685,6 @@
           "properties": {}
         },
         {
-          "ruleId": "a5927527-34de-320d-9d50-301231574dcf",
-          "kind": "fail",
-          "level": "warning",
-          "message": {
-            "text": "\"Potential XSS Vulnerability from User-Controlled Data in HTML String\""
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "vulnerabilities/authbypass/authbypass.js",
-                  "uriBaseId": "%SRCROOT%"
-                },
-                "region": {
-                  "startLine": 10,
-                  "startColumn": 2,
-                  "endLine": 10,
-                  "endColumn": 64,
-                  "snippet": {
-                    "text": "\tfirst_name = document.getElementById('first_name_' + id).value"
-                  }
-                }
-              }
-            }
-          ],
-          "partialFingerprints": {
-            "glog-pfp-ruleFileLineCode/v1": "8b47f04dbe1f9807acc5de8531abc1e2cf5fa3eea45634db800fb5a256cb5947",
-            "glog-pfp-ruleFileCode/v1": "dde6011c2e4634fabc6d572c75a04a9d8854e4a45bdc96c39be33d71ad927948"
-          },
-          "fingerprints": {
-            "glog-fp-ruleFileCode/v1": "dde6011c2e4634fabc6d572c75a04a9d8854e4a45bdc96c39be33d71ad927948"
-          },
-          "properties": {}
-        },
-        {
           "ruleId": "55250223-e1b5-3b88-933a-d81413e39489",
           "kind": "fail",
           "level": "warning",
@@ -637,7 +720,7 @@
           "properties": {}
         },
         {
-          "ruleId": "4b61b340-44c2-36c1-97ba-d367b5819328",
+          "ruleId": "a5927527-34de-320d-9d50-301231574dcf",
           "kind": "fail",
           "level": "warning",
           "message": {
@@ -651,23 +734,23 @@
                   "uriBaseId": "%SRCROOT%"
                 },
                 "region": {
-                  "startLine": 11,
+                  "startLine": 10,
                   "startColumn": 2,
-                  "endLine": 11,
-                  "endColumn": 58,
+                  "endLine": 10,
+                  "endColumn": 64,
                   "snippet": {
-                    "text": "\tsurname = document.getElementById('surname_' + id).value"
+                    "text": "\tfirst_name = document.getElementById('first_name_' + id).value"
                   }
                 }
               }
             }
           ],
           "partialFingerprints": {
-            "glog-pfp-ruleFileLineCode/v1": "89d2e5cc62e6ba4a198f18a65e3dd2dab0579daa6ad2cb9702f01bd2ef73ff21",
-            "glog-pfp-ruleFileCode/v1": "bdce5ca374d744d5a36ceac074b02c815fcb1556889328ac2a4d44996198983c"
+            "glog-pfp-ruleFileLineCode/v1": "8b47f04dbe1f9807acc5de8531abc1e2cf5fa3eea45634db800fb5a256cb5947",
+            "glog-pfp-ruleFileCode/v1": "dde6011c2e4634fabc6d572c75a04a9d8854e4a45bdc96c39be33d71ad927948"
           },
           "fingerprints": {
-            "glog-fp-ruleFileCode/v1": "bdce5ca374d744d5a36ceac074b02c815fcb1556889328ac2a4d44996198983c"
+            "glog-fp-ruleFileCode/v1": "dde6011c2e4634fabc6d572c75a04a9d8854e4a45bdc96c39be33d71ad927948"
           },
           "properties": {}
         },
@@ -703,6 +786,41 @@
           },
           "fingerprints": {
             "glog-fp-ruleFileCode/v1": "37701e6c3bfa6b3c094b50e3256ba468a4d7ed016b5289968b88d1c29f7a6d0b"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "4b61b340-44c2-36c1-97ba-d367b5819328",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "\"Potential XSS Vulnerability from User-Controlled Data in HTML String\""
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "vulnerabilities/authbypass/authbypass.js",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 11,
+                  "startColumn": 2,
+                  "endLine": 11,
+                  "endColumn": 58,
+                  "snippet": {
+                    "text": "\tsurname = document.getElementById('surname_' + id).value"
+                  }
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "glog-pfp-ruleFileLineCode/v1": "89d2e5cc62e6ba4a198f18a65e3dd2dab0579daa6ad2cb9702f01bd2ef73ff21",
+            "glog-pfp-ruleFileCode/v1": "bdce5ca374d744d5a36ceac074b02c815fcb1556889328ac2a4d44996198983c"
+          },
+          "fingerprints": {
+            "glog-fp-ruleFileCode/v1": "bdce5ca374d744d5a36ceac074b02c815fcb1556889328ac2a4d44996198983c"
           },
           "properties": {}
         }
